@@ -261,7 +261,7 @@ def cmd_object_put(args):
         # build a fake file list with all the info necessary
         local_list = {
             "-": {
-                'full_name_unicode' : 'STDIN'
+                'full_name_unicode' : 'STDIN',
                 'full_name'         : 'STDIN',
                 'size'              : 0,
                 'mtime'             : localtime(),
