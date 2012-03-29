@@ -345,13 +345,18 @@ class S3(object):
         if uri.type != "s3":
             raise ValueError("Expected URI type 's3', got '%s'" % uri.type)
 
-        if not os.path.isfile(filename):
-            raise InvalidFileError(u"%s is not a regular file" % unicodise(filename))
-        try:
-            file = open(filename, "rb")
-            size = os.stat(filename)[ST_SIZE]
-        except (IOError, OSError), e:
-            raise InvalidFileError(u"%s: %s" % (unicodise(filename), e.strerror))
+        if filename == "stdin":
+            file = open(sys.stdin, "rb")
+            size = -1
+        else:
+            if not os.path.isfile(filename):
+                raise InvalidFileError(u"%s is not a regular file" % unicodise(filename))
+            try:
+                file = open(filename, "rb")
+                size = os.stat(filename)[ST_SIZE]
+            except (IOError, OSError), e:
+                raise InvalidFileError(u"%s: %s" % (unicodise(filename), e.strerror))
+
 
         headers = SortedDict(ignore_case = True)
         if extra_headers:
@@ -375,7 +380,7 @@ class S3(object):
         ## Multipart decision
         multipart = False
         if self.config.enable_multipart:
-            if size > self.config.multipart_chunk_size_mb * 1024 * 1024:
+            if size == -1 or size > self.config.multipart_chunk_size_mb * 1024 * 1024:
                 multipart = True
         if multipart:
             # Multipart requests are quite different... drop here
